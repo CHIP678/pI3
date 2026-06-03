@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accesso QR Code</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .container {
+            background: white;
+            max-width: 400px;
+            margin: auto;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        #qrcode {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .url {
+            background: #e0e0e0;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 12px;
+            word-break: break-all;
+            margin: 15px 0;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .contatore {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8f5e9;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>📱 Scannerizza il QR</h2>
+        
+        <div id="qrcode"></div>
+        
+        <div class="url" id="mostraUrl"></div>
+        
+        <button onclick="copiaUrl()">📋 Copia URL</button>
+        
+        <div class="contatore">
+            <strong>👥 Accessi totali:</strong> <span id="contatore">0</span>
+        </div>
+    </div>
+
+    <script>
+        // Ottieni l'URL corrente
+        const urlCorrente = window.location.href.split('?')[0];
+        
+        // Genera ID unico per questo QR
+        const idVisitatore = Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+        const urlCompleta = urlCorrente + '?ref=' + idVisitatore;
+        
+        // Mostra URL
+        document.getElementById('mostraUrl').innerText = urlCompleta;
+        
+        // Crea QR code
+        new QRCode(document.getElementById("qrcode"), {
+            text: urlCompleta,
+            width: 200,
+            height: 200
+        });
+        
+        // Sistema contatore
+        let accessi = localStorage.getItem('accessi') ? parseInt(localStorage.getItem('accessi')) : 0;
+        
+        // Controlla se è un nuovo accesso
+        const parametro = new URLSearchParams(window.location.search);
+        if(parametro.has('ref')) {
+            const nuovoId = parametro.get('ref');
+            const ultimoId = localStorage.getItem('ultimoId');
+            
+            if(ultimoId !== nuovoId) {
+                accessi++;
+                localStorage.setItem('accessi', accessi);
+                localStorage.setItem('ultimoId', nuovoId);
+            }
+        }
+        
+        // Mostra contatore
+        document.getElementById('contatore').innerText = accessi;
+        
+        // Funzione copia URL
+        function copiaUrl() {
+            navigator.clipboard.writeText(urlCompleta);
+            alert('URL copiato!');
+        }
+    </script>
+</body>
+</html>
